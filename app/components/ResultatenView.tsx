@@ -117,6 +117,9 @@ function DienstDetail({ mw }: { mw: MedewerkerResultaat }) {
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-xl font-bold text-[#1F4E79]">{mw.medewerker}</h2>
+            {mw.opdrachtgever && (
+              <p className="text-sm font-medium text-[#1F4E79] mt-0.5">{mw.opdrachtgever}</p>
+            )}
             <p className="text-sm text-gray-500 mt-0.5">{mw.kostenplaats}</p>
           </div>
           <div className="text-right">
