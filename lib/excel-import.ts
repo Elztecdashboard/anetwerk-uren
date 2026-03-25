@@ -40,7 +40,7 @@ export function verwerkExcel(buffer: ArrayBuffer): VerwerkingsResultaat {
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true }) as unknown[][];
 
-  const verwerkt = new Map<string, { cao: ReturnType<typeof getCao>; diensten: VerwerkteDienst[] }>();
+  const verwerkt = new Map<string, { cao: ReturnType<typeof getCao>; opdrachtgever: string; diensten: VerwerkteDienst[] }>();
   const reisBuffer: Array<{ mw: string; kp: string; datum: Date; uursoort: string; opmerking: string; km: number }> = [];
   const nietHerkend: string[] = [];
 
@@ -107,7 +107,7 @@ export function verwerkExcel(buffer: ArrayBuffer): VerwerkingsResultaat {
       }
 
       if (!verwerkt.has(sleutel)) {
-        verwerkt.set(sleutel, { cao, diensten: [] });
+        verwerkt.set(sleutel, { cao, opdrachtgever: opdracht, diensten: [] });
       }
 
       const entry = verwerkt.get(sleutel)!;
@@ -198,6 +198,7 @@ export function verwerkExcel(buffer: ArrayBuffer): VerwerkingsResultaat {
 
     medewerkers.push({
       medewerker: mw,
+      opdrachtgever: data.opdrachtgever,
       kostenplaats: kp,
       cao: data.cao!,
       diensten: data.diensten,

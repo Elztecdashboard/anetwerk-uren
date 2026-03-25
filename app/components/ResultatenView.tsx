@@ -68,7 +68,10 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
                     {mw.cao.toUpperCase()}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                {mw.opdrachtgever && (
+                  <div className="text-xs font-medium text-[#1F4E79] mt-0.5 truncate">{mw.opdrachtgever}</div>
+                )}
+                <div className="flex justify-between text-xs text-gray-500 mt-0.5">
                   <span className="truncate max-w-[130px]">{mw.kostenplaats}</span>
                   <span className="font-mono">{mw.totaalUren.toFixed(2)} u</span>
                 </div>

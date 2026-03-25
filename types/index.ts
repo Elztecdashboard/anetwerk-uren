@@ -35,6 +35,7 @@ export interface VerwerkteDienst {
 
 export interface MedewerkerResultaat {
   medewerker: string;
+  opdrachtgever: string;
   kostenplaats: string;
   cao: CaoType;
   diensten: VerwerkteDienst[];
