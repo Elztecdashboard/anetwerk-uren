@@ -4,6 +4,62 @@ function t(h: number, m = 0): number {
   return h * 60 + m;
 }
 
+// Paaszondag berekening (Meeus/Jones/Butcher algoritme)
+function easterSunday(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+}
+
+function addDays(d: Date, n: number): Date {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function sameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
+
+export function isFeestdag(datum: Date): boolean {
+  const y = datum.getFullYear();
+  const easter = easterSunday(y);
+
+  // Koningsdag: 27 april, maar als dat een zondag is → 26 april
+  const koningsdag27 = new Date(y, 3, 27);
+  const koningsdag = koningsdag27.getDay() === 0 ? new Date(y, 3, 26) : koningsdag27;
+
+  const feestdagen = [
+    new Date(y, 0, 1),       // Nieuwjaarsdag
+    addDays(easter, -2),      // Goede Vrijdag
+    easter,                   // Eerste Paasdag
+    addDays(easter, 1),       // Tweede Paasdag
+    koningsdag,               // Koningsdag
+    new Date(y, 4, 5),       // Bevrijdingsdag
+    addDays(easter, 39),      // Hemelvaartsdag
+    addDays(easter, 49),      // Eerste Pinksterdag
+    addDays(easter, 50),      // Tweede Pinksterdag
+    new Date(y, 11, 25),     // Eerste Kerstdag
+    new Date(y, 11, 26),     // Tweede Kerstdag
+  ];
+
+  return feestdagen.some((f) => sameDay(datum, f));
+}
+
 export const CAO_ORT: Record<
   CaoType,
   {
@@ -11,6 +67,7 @@ export const CAO_ORT: Record<
     vrijdag?: OrtTijdvak[];
     zaterdag: OrtTijdvak[];
     zondag: OrtTijdvak[];
+    feestdag?: OrtTijdvak[];
     slaap_uren: number;
   }
 > = {
@@ -41,7 +98,8 @@ export const CAO_ORT: Record<
       { startMin: t(22), eindMin: 1440, pct: 147 },
     ],
     zaterdag: [{ startMin: t(0), eindMin: 1440, pct: 152 }],
-    zondag: [{ startMin: t(0), eindMin: 1440, pct: 160 }],
+    zondag: [{ startMin: t(0), eindMin: 1440, pct: 152 }],
+    feestdag: [{ startMin: t(0), eindMin: 1440, pct: 160 }],
     slaap_uren: 8,
   },
   jeugd: {
@@ -100,7 +158,8 @@ export const DAG_NAMEN = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 export function dagType(
   datum: Date,
   cao: CaoType
-): "weekdag" | "vrijdag" | "zaterdag" | "zondag" {
+): "weekdag" | "vrijdag" | "zaterdag" | "zondag" | "feestdag" {
+  if (isFeestdag(datum)) return "feestdag";
   const wd = datum.getDay(); // 0=zondag, 6=zaterdag
   if (wd === 0) return "zondag";
   if (wd === 6) return "zaterdag";
@@ -111,6 +170,7 @@ export function dagType(
 export function getSchema(cao: CaoType, datum: Date): OrtTijdvak[] {
   const schema = CAO_ORT[cao];
   const dt = dagType(datum, cao);
+  if (dt === "feestdag" && schema.feestdag) return schema.feestdag;
   if (dt === "vrijdag" && schema.vrijdag) return schema.vrijdag;
   if (dt === "zaterdag") return schema.zaterdag;
   if (dt === "zondag") return schema.zondag;
