@@ -87,6 +87,7 @@ export const CAO_ORT: Record<
       { startMin: t(22), eindMin: 1440, pct: 149 },
     ],
     zondag: [{ startMin: t(0), eindMin: 1440, pct: 160 }],
+    feestdag: [{ startMin: t(0), eindMin: 1440, pct: 160 }],
     slaap_uren: 4,
   },
   ghz: {
@@ -116,6 +117,7 @@ export const CAO_ORT: Record<
       { startMin: t(22), eindMin: 1440, pct: 145 },
     ],
     zondag: [{ startMin: t(0), eindMin: 1440, pct: 145 }],
+    feestdag: [{ startMin: t(0), eindMin: 1440, pct: 145 }],
     slaap_uren: 4,
   },
   vvt: {
@@ -134,6 +136,7 @@ export const CAO_ORT: Record<
       { startMin: t(22), eindMin: 1440, pct: 152 },
     ],
     zondag: [{ startMin: t(0), eindMin: 1440, pct: 160 }],
+    feestdag: [{ startMin: t(0), eindMin: 1440, pct: 160 }],
     slaap_uren: 4,
   },
   sw: {
@@ -149,6 +152,7 @@ export const CAO_ORT: Record<
     ],
     zaterdag: [{ startMin: t(0), eindMin: 1440, pct: 125 }],
     zondag: [{ startMin: t(0), eindMin: 1440, pct: 145 }],
+    feestdag: [{ startMin: t(0), eindMin: 1440, pct: 145 }],
     slaap_uren: 4,
   },
 };
@@ -170,7 +174,15 @@ export function dagType(
 export function getSchema(cao: CaoType, datum: Date): OrtTijdvak[] {
   const schema = CAO_ORT[cao];
   const dt = dagType(datum, cao);
-  if (dt === "feestdag" && schema.feestdag) return schema.feestdag;
+  if (dt === "feestdag") {
+    if (schema.feestdag) return schema.feestdag;
+    // Geen feestdag-schema: val terug op de echte dag van de week
+    const wd = datum.getDay();
+    if (wd === 0) return schema.zondag;
+    if (wd === 6) return schema.zaterdag;
+    if (wd === 5 && schema.vrijdag) return schema.vrijdag;
+    return schema.weekdag;
+  }
   if (dt === "vrijdag" && schema.vrijdag) return schema.vrijdag;
   if (dt === "zaterdag") return schema.zaterdag;
   if (dt === "zondag") return schema.zondag;
