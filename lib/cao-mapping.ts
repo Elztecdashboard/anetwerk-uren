@@ -29,7 +29,7 @@ export function getCao(
 
   // Primair op opdrachtgever
   if (["lister", "ribw"].some((x) => o.includes(x))) return "ggz";
-  if (["asvz", "humanitas", "zozijn", "prezzent", "seizoenen"].some((x) => o.includes(x))) return "ghz";
+  if (["asvz", "humanitas", "zozijn", "prezzent", "seizoenen", "kentalis"].some((x) => o.includes(x))) return "ghz";
   if (["oosterpoort", "klinq", "timon", "youke", "youké", "kinabu", "nabucco", "ivg kind", "het werkt", "veilig thuis", "pluryn"].some((x) => o.includes(x))) return "jeugd";
   if (["woondroomzorg", "busehoek", "eigen thuis", "toekomst"].some((x) => o.includes(x))) return "vvt";
   if (["smo", "traverse", "tussenvoorziening"].some((x) => o.includes(x))) return "sw";
