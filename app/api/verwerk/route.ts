@@ -13,6 +13,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Geen bestand meegegeven" }, { status: 400 });
     }
 
+    // MIME-type validatie: alleen Excel bestanden toegestaan
+    const toegestaneMimeTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+    ]
+    const extensie = bestand.name.split('.').pop()?.toLowerCase()
+    if (!toegestaneMimeTypes.includes(bestand.type) && extensie !== 'xlsx' && extensie !== 'xls') {
+      return NextResponse.json({ error: "Alleen Excel-bestanden (.xlsx, .xls) zijn toegestaan" }, { status: 400 });
+    }
+
     const buffer = await bestand.arrayBuffer();
     const resultaat = verwerkExcel(buffer);
 
