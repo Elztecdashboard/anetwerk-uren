@@ -10,6 +10,7 @@ export default function ResultatenPage({ params }: { params: Promise<{ id: strin
   const [data, setData] = useState<{ resultaat: VerwerkingsResultaat; bestandsnaam: string } | null>(null);
   const [fout, setFout] = useState<string | null>(null);
   const [geselecteerdeMw, setGeselecteerdeMw] = useState<MedewerkerResultaat | null>(null);
+  const [verwerkt, setVerwerkt] = useState<string[]>([]);
 
   useEffect(() => {
     fetch(`/api/uploads/${id}`)
@@ -19,10 +20,23 @@ export default function ResultatenPage({ params }: { params: Promise<{ id: strin
           setFout(d.error);
         } else {
           setData({ resultaat: d.resultaat, bestandsnaam: d.bestandsnaam });
+          setVerwerkt(d.verwerkt ?? []);
         }
       })
       .catch(() => setFout("Kon resultaten niet laden"));
   }, [id]);
+
+  async function handleToggleVerwerkt(key: string) {
+    const nieuw = verwerkt.includes(key)
+      ? verwerkt.filter((k) => k !== key)
+      : [...verwerkt, key];
+    setVerwerkt(nieuw);
+    await fetch(`/api/uploads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ verwerkt: nieuw }),
+    });
+  }
 
   if (fout) {
     return <div className="text-red-600">{fout}</div>;
@@ -43,6 +57,8 @@ export default function ResultatenPage({ params }: { params: Promise<{ id: strin
         uploadId={id}
         geselecteerdeMw={geselecteerdeMw}
         onSelecteerMw={setGeselecteerdeMw}
+        verwerkt={verwerkt}
+        onToggleVerwerkt={handleToggleVerwerkt}
       />
     </div>
   );

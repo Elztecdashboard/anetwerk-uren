@@ -21,9 +21,11 @@ interface Props {
   uploadId: string | null;
   geselecteerdeMw: MedewerkerResultaat | null;
   onSelecteerMw: (mw: MedewerkerResultaat | null) => void;
+  verwerkt: string[];
+  onToggleVerwerkt: (key: string) => void;
 }
 
-export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteerMw }: Props) {
+export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteerMw, verwerkt, onToggleVerwerkt }: Props) {
   return (
     <div className="space-y-6">
       {/* Samenvatting */}
@@ -46,40 +48,71 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
       <div className="flex gap-6">
         {/* Overzichtslijst */}
         <div className="w-80 flex-shrink-0">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            Medewerkers
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Medewerkers
+            </h2>
+            <span className="text-xs font-medium text-gray-500">
+              <span className="text-green-600 font-semibold">{verwerkt.length}</span>
+              {" / "}{resultaat.medewerkers.length} verwerkt
+            </span>
+          </div>
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            {resultaat.medewerkers.map((mw) => (
-              <button
-                key={`${mw.medewerker}|||${mw.kostenplaats}`}
-                onClick={() => onSelecteerMw(geselecteerdeMw?.medewerker === mw.medewerker && geselecteerdeMw?.kostenplaats === mw.kostenplaats ? null : mw)}
-                className={`w-full text-left px-4 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition ${
-                  geselecteerdeMw?.medewerker === mw.medewerker && geselecteerdeMw?.kostenplaats === mw.kostenplaats
-                    ? "bg-blue-50 border-l-4 border-l-[#1F4E79]"
-                    : ""
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-sm text-gray-900 truncate max-w-[140px]">
-                    {mw.medewerker}
-                  </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-2 ${CAO_KLEUREN[mw.cao] || "bg-gray-100 text-gray-600"}`}>
-                    {mw.cao.toUpperCase()}
-                  </span>
+            {resultaat.medewerkers.map((mw) => {
+              const key = `${mw.medewerker}|||${mw.kostenplaats}`;
+              const isVerwerkt = verwerkt.includes(key);
+              const isActief = geselecteerdeMw?.medewerker === mw.medewerker && geselecteerdeMw?.kostenplaats === mw.kostenplaats;
+              return (
+                <div
+                  key={key}
+                  className={`flex items-stretch border-b border-gray-100 last:border-0 transition ${
+                    isVerwerkt ? "bg-green-50" : isActief ? "bg-blue-50" : "hover:bg-gray-50"
+                  } ${isActief ? "border-l-4 border-l-[#1F4E79]" : ""}`}
+                >
+                  <button
+                    onClick={() => onSelecteerMw(isActief ? null : mw)}
+                    className="flex-1 text-left px-4 py-3 min-w-0"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`font-medium text-sm truncate max-w-[120px] ${isVerwerkt ? "text-green-700 line-through" : "text-gray-900"}`}>
+                        {mw.medewerker}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-2 ${CAO_KLEUREN[mw.cao] || "bg-gray-100 text-gray-600"}`}>
+                        {mw.cao.toUpperCase()}
+                      </span>
+                    </div>
+                    {mw.opdrachtgever && (
+                      <div className={`text-xs font-medium mt-0.5 truncate ${isVerwerkt ? "text-green-600" : "text-[#1F4E79]"}`}>{mw.opdrachtgever}</div>
+                    )}
+                    <div className="flex justify-between text-xs text-gray-500 mt-0.5">
+                      <span className="truncate max-w-[100px]">{mw.kostenplaats}</span>
+                      <span className="font-mono">{mw.totaalUren.toFixed(2)} u</span>
+                    </div>
+                    {mw.totaalKm > 0 && (
+                      <div className="text-xs text-gray-400 mt-0.5">{mw.totaalKm} km</div>
+                    )}
+                  </button>
+                  {/* Vinkje knop */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onToggleVerwerkt(key); }}
+                    title={isVerwerkt ? "Markeer als niet verwerkt" : "Markeer als verwerkt"}
+                    className={`flex-shrink-0 w-10 flex items-center justify-center border-l border-gray-100 transition ${
+                      isVerwerkt ? "text-green-500 hover:text-green-700 bg-green-50" : "text-gray-300 hover:text-green-500"
+                    }`}
+                  >
+                    {isVerwerkt ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <circle cx="12" cy="12" r="9" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
-                {mw.opdrachtgever && (
-                  <div className="text-xs font-medium text-[#1F4E79] mt-0.5 truncate">{mw.opdrachtgever}</div>
-                )}
-                <div className="flex justify-between text-xs text-gray-500 mt-0.5">
-                  <span className="truncate max-w-[130px]">{mw.kostenplaats}</span>
-                  <span className="font-mono">{mw.totaalUren.toFixed(2)} u</span>
-                </div>
-                {mw.totaalKm > 0 && (
-                  <div className="text-xs text-gray-400 mt-0.5">{mw.totaalKm} km</div>
-                )}
-              </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 

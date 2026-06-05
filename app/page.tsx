@@ -11,7 +11,21 @@ export default function HomePage() {
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [geselecteerdeMw, setGeselecteerdeMw] = useState<MedewerkerResultaat | null>(null);
   const [bestandsnaam, setBestandsnaam] = useState<string | null>(null);
+  const [verwerkt, setVerwerkt] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleToggleVerwerkt(key: string) {
+    if (!uploadId) return;
+    const nieuw = verwerkt.includes(key)
+      ? verwerkt.filter((k) => k !== key)
+      : [...verwerkt, key];
+    setVerwerkt(nieuw);
+    await fetch(`/api/uploads/${uploadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ verwerkt: nieuw }),
+    });
+  }
 
   async function handleUpload(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,6 +51,7 @@ export default function HomePage() {
 
       setResultaat(data.resultaat);
       setUploadId(data.id);
+      setVerwerkt([]);
     } catch (err) {
       setFout("Verbindingsfout: " + (err as Error).message);
     } finally {
@@ -95,6 +110,8 @@ export default function HomePage() {
           uploadId={uploadId}
           geselecteerdeMw={geselecteerdeMw}
           onSelecteerMw={setGeselecteerdeMw}
+          verwerkt={verwerkt}
+          onToggleVerwerkt={handleToggleVerwerkt}
         />
       )}
     </div>

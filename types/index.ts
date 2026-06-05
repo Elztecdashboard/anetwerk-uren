@@ -57,4 +57,5 @@ export interface UploadRecord {
   periode: string | null;
   aantal_medewerkers: number;
   resultaat: VerwerkingsResultaat;
+  verwerkt: string[];
 }
