@@ -45,9 +45,9 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
         </div>
       )}
 
-      <div className="flex gap-6">
+      <div className="flex gap-6 items-start">
         {/* Overzichtslijst */}
-        <div className="w-80 flex-shrink-0">
+        <div className="w-80 flex-shrink-0 sticky top-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
               Medewerkers
@@ -57,7 +57,7 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
               {" / "}{resultaat.medewerkers.length} verwerkt
             </span>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-y-auto max-h-[calc(100vh-12rem)]">
             {resultaat.medewerkers.map((mw) => {
               const key = `${mw.medewerker}|||${mw.kostenplaats}`;
               const isVerwerkt = verwerkt.includes(key);
