@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getAdminClient } from "@/lib/supabase-admin";
 
 async function checkAdmin() {
   const supabase = await createClient();
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     updates.user_metadata = { naam, is_admin: is_admin || false };
   }
 
-  const { error } = await supabaseAdmin.auth.admin.updateUserById(id, updates);
+  const { error } = await getAdminClient().auth.admin.updateUserById(id, updates);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
@@ -40,7 +40,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Je kunt je eigen account niet verwijderen" }, { status: 400 });
   }
 
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(id);
+  const { error } = await getAdminClient().auth.admin.deleteUser(id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
