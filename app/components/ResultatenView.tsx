@@ -45,9 +45,9 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
         </div>
       )}
 
-      <div className="flex gap-6 items-start">
-        {/* Overzichtslijst */}
-        <div className="w-80 flex-shrink-0 sticky top-6">
+      <div className="flex gap-6" style={{height: "calc(100vh - 280px)", minHeight: "500px"}}>
+        {/* Overzichtslijst — eigen scroll, blijft altijd in beeld */}
+        <div className="w-80 flex-shrink-0 flex flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
               Medewerkers
@@ -57,7 +57,7 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
               {" / "}{resultaat.medewerkers.length} verwerkt
             </span>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-y-auto max-h-[calc(100vh-12rem)]">
+          <div className="flex-1 bg-white rounded-xl border border-gray-200 overflow-y-auto">
             {resultaat.medewerkers.map((mw) => {
               const key = `${mw.medewerker}|||${mw.kostenplaats}`;
               const isVerwerkt = verwerkt.includes(key);
@@ -65,48 +65,50 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
               return (
                 <div
                   key={key}
-                  className={`flex items-stretch border-b border-gray-100 last:border-0 transition ${
+                  className={`flex items-stretch border-b border-gray-100 last:border-0 transition-colors ${
                     isVerwerkt ? "bg-green-50" : isActief ? "bg-blue-50" : "hover:bg-gray-50"
-                  } ${isActief ? "border-l-4 border-l-[#1F4E79]" : ""}`}
+                  } ${isActief ? "border-l-4 border-l-[#1F4E79]" : "border-l-4 border-l-transparent"}`}
                 >
+                  {/* Naam + info */}
                   <button
+                    type="button"
                     onClick={() => onSelecteerMw(isActief ? null : mw)}
-                    className="flex-1 text-left px-4 py-3 min-w-0"
+                    className="flex-1 text-left px-3 py-3 min-w-0"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className={`font-medium text-sm truncate max-w-[120px] ${isVerwerkt ? "text-green-700 line-through" : "text-gray-900"}`}>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className={`font-medium text-sm truncate ${isVerwerkt ? "text-green-700 line-through" : "text-gray-900"}`}>
                         {mw.medewerker}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-2 ${CAO_KLEUREN[mw.cao] || "bg-gray-100 text-gray-600"}`}>
+                      <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${CAO_KLEUREN[mw.cao] || "bg-gray-100 text-gray-600"}`}>
                         {mw.cao.toUpperCase()}
                       </span>
                     </div>
                     {mw.opdrachtgever && (
                       <div className={`text-xs font-medium mt-0.5 truncate ${isVerwerkt ? "text-green-600" : "text-[#1F4E79]"}`}>{mw.opdrachtgever}</div>
                     )}
-                    <div className="flex justify-between text-xs text-gray-500 mt-0.5">
-                      <span className="truncate max-w-[100px]">{mw.kostenplaats}</span>
+                    <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                      <span className="truncate max-w-[90px]">{mw.kostenplaats}</span>
                       <span className="font-mono">{mw.totaalUren.toFixed(2)} u</span>
                     </div>
-                    {mw.totaalKm > 0 && (
-                      <div className="text-xs text-gray-400 mt-0.5">{mw.totaalKm} km</div>
-                    )}
                   </button>
-                  {/* Vinkje knop */}
+                  {/* Vinkje */}
                   <button
-                    onClick={(e) => { e.stopPropagation(); onToggleVerwerkt(key); }}
-                    title={isVerwerkt ? "Markeer als niet verwerkt" : "Markeer als verwerkt"}
-                    className={`flex-shrink-0 w-10 flex items-center justify-center border-l border-gray-100 transition ${
-                      isVerwerkt ? "text-green-500 hover:text-green-700 bg-green-50" : "text-gray-300 hover:text-green-500"
+                    type="button"
+                    onClick={() => onToggleVerwerkt(key)}
+                    title={isVerwerkt ? "Klik om te ongedaan maken" : "Klik om als verwerkt te markeren"}
+                    className={`flex-shrink-0 w-12 flex items-center justify-center border-l transition-colors ${
+                      isVerwerkt
+                        ? "border-green-200 bg-green-100 text-green-600 hover:bg-green-200"
+                        : "border-gray-100 bg-white text-gray-300 hover:bg-green-50 hover:text-green-500"
                     }`}
                   >
                     {isVerwerkt ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
                       </svg>
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <circle cx="12" cy="12" r="9" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     )}
                   </button>
@@ -116,8 +118,8 @@ export default function ResultatenView({ resultaat, geselecteerdeMw, onSelecteer
           </div>
         </div>
 
-        {/* Detail view */}
-        <div className="flex-1 min-w-0">
+        {/* Detail view — eigen scroll */}
+        <div className="flex-1 min-w-0 overflow-y-auto">
           {geselecteerdeMw ? (
             <DienstDetail mw={geselecteerdeMw} />
           ) : (
